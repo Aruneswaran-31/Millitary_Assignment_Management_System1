@@ -1,20 +1,33 @@
-const API = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api';
+const API = import.meta.env.VITE_API_BASE;
+
+if (!API) {
+  console.error("VITE_API_BASE is not defined");
+}
 
 export async function apiFetch(path: string, opts: RequestInit = {}) {
   const token = localStorage.getItem('token');
-  const headers = new Headers(opts.headers as HeadersInit || {});
-  headers.set('Content-Type', 'application/json');
-  if (token) headers.set('Authorization', `Bearer ${token}`);
 
-  const res = await fetch(`${API}${path}`, { ...opts, headers });
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(opts.headers || {}),
+    },
+  });
+
   const text = await res.text();
+  let data: any = null;
+
   try {
-    const data = text ? JSON.parse(text) : null;
-    if (!res.ok) throw data || { message: 'API error' };
-    return data;
-  } catch (err) {
-    // non-json response fallback
-    if (!res.ok) throw { message: text || 'API error' };
-    return null;
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
   }
+
+  if (!res.ok) {
+    throw data || { error: 'API error' };
+  }
+
+  return data;
 }

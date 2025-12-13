@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 
+
 export default function Login() {
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('adminpass');
@@ -11,7 +12,7 @@ export default function Login() {
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setError(null);
     try {
-      const data:any = await apiFetch('/auth/login',{ method:'POST', body: JSON.stringify({ username, password })});
+      const data:any = await apiFetch('/login',{ method:'POST', body: JSON.stringify({ username, password })});
       const token = data?.token;
       if (!token) return setError('Login failed');
       localStorage.setItem('token', token);
