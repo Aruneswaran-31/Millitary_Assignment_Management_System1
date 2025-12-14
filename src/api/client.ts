@@ -1,32 +1,36 @@
-const API = import.meta.env.VITE_API_BASE;
+const API =
+  import.meta.env.VITE_API_BASE ||
+  "https://millitary-assignment-management-system-2.onrender.com/api";
 
-if (!API) {
-  console.error("VITE_API_BASE is not defined");
-}
+export async function apiFetch(
+  path: string,
+  opts: RequestInit = {}
+) {
+  const token = localStorage.getItem("token");
 
-export async function apiFetch(path: string, opts: RequestInit = {}) {
-  const token = localStorage.getItem('token');
+  const headers = new Headers(opts.headers || {});
+  headers.set("Content-Type", "application/json");
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   const res = await fetch(`${API}${path}`, {
     ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(opts.headers || {}),
-    },
+    headers,
   });
 
   const text = await res.text();
-  let data: any = null;
+  let data = null;
 
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
-    data = null;
+    // ignore JSON parse error
   }
 
   if (!res.ok) {
-    throw data || { error: 'API error' };
+    throw data || { message: "API error" };
   }
 
   return data;
