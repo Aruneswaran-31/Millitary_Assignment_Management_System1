@@ -1,6 +1,5 @@
-const API =
-  import.meta.env.VITE_API_BASE ||
-  "https://millitary-assignment-management-system-2.onrender.com/api";
+const API = import.meta.env.VITE_API_BASE;
+
 
 export async function apiFetch(
   path: string,
